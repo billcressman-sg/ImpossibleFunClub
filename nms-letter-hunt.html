@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10192b">
+<title>NMS Letter Hunt</title>
+<style>
+  :root{
+    --ink:#0e1626;
+    --ink-2:#16223a;
+    --ink-3:#1d2c4a;
+	--purple-text: #4F25D4;
+    --brass:#cda227;
+    --brass-soft:#f0d488;
+    --forest:#34906c;
+    --coral:#e2566b;
+    --stone:#f1ead9;
+    --stone-dim:#a9a08c;
+  }
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--ink);
+  color:var(--purple-text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+
+body{
+  background:
+    radial-gradient(ellipse 600px 360px at 50% -60px, rgba(205,162,39,0.16), transparent 70%),
+    linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 80%, var(--ink) 100%);
+  min-height:100vh;
+}
+
+.stage{
+  max-width:480px;
+  margin:0 auto;
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+}
+
+.screen{
+  padding:28px 20px 40px;
+  min-height:100vh;
+}
+.screen[hidden]{ display:none; }
+
+.eyebrow{
+  margin:0;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--brass-soft);
+  font-weight:600;
+}
+h1{
+  font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  font-size:clamp(28px,8vw,38px);
+  line-height:1.05;
+  margin:6px 0 10px;
+  color:var(--stone);
+}
+h2{
+  font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  margin:0 0 8px;
+}
+.category{
+  margin:0 0 18px;
+  font-size:14px;
+  font-style:italic;
+  color:var(--stone-dim);
+}
+.category span{
+  color:var(--brass-soft);
+  font-style:normal;
+  font-weight:600;
+}
+.rules{
+  margin:0 0 22px;
+  font-size:14.5px;
+  line-height:1.5;
+  color:#cfc6b3;
+}
+.footnote{
+  margin:26px 0 0;
+  font-size:12px;
+  line-height:1.6;
+  color:var(--stone-dim);
+  border-top:1px solid rgba(205,162,39,0.25);
+  padding-top:14px;
+}
+
+.board{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:18px 14px;
+  margin:0 0 22px;
+  padding:20px 12px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(205,162,39,0.18);
+}
+.word{
+  display:flex;
+  gap:7px;
+}
+.box{
+  -webkit-appearance:none;
+  appearance:none;
+  width:clamp(27px,8.6vw,36px);
+  height:clamp(36px,11.4vw,46px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  font-weight:700;
+  font-size:clamp(15px,4.8vw,19px);
+  font-family:inherit;
+  margin:0;
+  padding:0;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 6px, transparent 6px 12px),
+    var(--ink-3);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,0.35);
+  color:transparent;
+}
+button.box{
+  cursor:pointer;
+  border:1px solid rgba(205,162,39,0.4);
+  transition:transform .08s ease, border-color .15s ease, background .15s ease;
+}
+button.box:active{
+  transform:translateY(1px) scale(0.96);
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.08) 0 6px, transparent 6px 12px),
+    var(--ink-2);
+}
+button.box:focus-visible{
+  outline:2px solid var(--brass-soft);
+  outline-offset:2px;
+}
+@media (hover:hover){
+  button.box:hover{ border-color:rgba(205,162,39,0.65); }
+}
+.box.revealed{
+  color:var(--ink);
+  background:linear-gradient(160deg, var(--brass-soft), var(--brass));
+  border-color:var(--brass-soft);
+  box-shadow:0 0 0 1px rgba(205,162,39,0.4), 0 2px 10px rgba(205,162,39,0.45);
+  animation:pop .35s ease-out;
+}
+@keyframes pop{
+  0%{ transform:scale(.75) rotateX(40deg); }
+  100%{ transform:scale(1) rotateX(0); }
+}
+@media (prefers-reduced-motion: reduce){
+  .box.revealed{ animation:none; }
+}
+
+.progress{
+  text-align:center;
+  font-size:12.5px;
+  letter-spacing:.04em;
+  color:var(--stone-dim);
+  margin-bottom:6px;
+}
+
+.back{
+  background:none;
+  border:none;
+  color:var(--brass-soft);
+  font-size:14px;
+  padding:0;
+  margin-bottom:20px;
+  cursor:pointer;
+}
+.back:focus-visible{ outline:2px solid var(--brass-soft); }
+
+.challenge-card{
+  border:1px solid rgba(205,162,39,0.25);
+  border-radius:16px;
+  background:rgba(255,255,255,0.03);
+  padding:26px 20px;
+  text-align:center;
+}
+.challenge-letter{
+  width:56px;
+  height:56px;
+  margin:0 auto 18px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:Georgia,serif;
+  font-size:26px;
+  font-weight:700;
+  color:var(--ink);
+  background:linear-gradient(160deg, var(--brass-soft), var(--brass));
+}
+.challenge-label{
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--brass-soft);
+  margin:0 0 10px;
+}
+.challenge-question{
+  font-size:16.5px;
+  line-height:1.5;
+  color:var(--stone);
+  margin:0 0 22px;
+}
+#challenge-input{
+  width:100%;
+  padding:13px 14px;
+  font-size:16px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.18);
+  background:rgba(0,0,0,0.25);
+  color:var(--stone);
+  margin-bottom:14px;
+}
+#challenge-input:focus-visible{ outline:2px solid var(--brass-soft); }
+.challenge-actions{
+  display:flex;
+  gap:10px;
+}
+.btn{
+  flex:1;
+  padding:13px 14px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
+  font-family:inherit;
+  border:1px solid transparent;
+  cursor:pointer;
+}
+.btn:focus-visible{ outline:2px solid var(--brass-soft); outline-offset:2px; }
+.btn-primary{
+  background:linear-gradient(160deg, var(--brass-soft), var(--brass));
+  color:var(--ink);
+}
+.btn-primary:active{ transform:translateY(1px); }
+.btn-ghost{
+  background:transparent;
+  border-color:rgba(255,255,255,0.25);
+  color:var(--stone);
+}
+.feedback-error{
+  margin-top:16px;
+  font-size:14px;
+  color:var(--coral);
+}
+.success-panel{ text-align:center; }
+.success-title{
+  font-family:Georgia,serif;
+  font-size:24px;
+  color:#7fcdac;
+  margin:4px 0 6px;
+}
+.success-sub{
+  font-size:14px;
+  color:var(--stone-dim);
+  margin:0 0 20px;
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(8,12,22,0.86);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  z-index:10;
+}
+.overlay[hidden]{ display:none; }
+.win-card{
+  max-width:380px;
+  text-align:center;
+  border:1px solid var(--brass);
+  border-radius:18px;
+  background:var(--ink-2);
+  padding:32px 24px;
+  box-shadow:0 0 40px rgba(205,162,39,0.25);
+}
+.win-card h2{
+  color:var(--brass-soft);
+  font-size:22px;
+  margin-top:8px;
+}
+.win-card p{
+  font-size:14.5px;
+  line-height:1.6;
+  color:#cfc6b3;
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <section id="screen-main" class="screen">
+    <p class="eyebrow">National Museum of Singapore</p>
+    <h1>Letter Hunt</h1>
+    <p class="category">Category: <span>Team Building</span></p>
+
+    <p class="rules">
+      Tap any blank box below to pull up a challenge. Solve it, and every box sharing that letter fills in at once — wherever it lands. Get it wrong, or cancel out, and the box stays blank, ready to try again. You won't know which letter you're getting until you crack it.
+    </p>
+
+    <div class="board" id="phrase-board" aria-live="polite"></div>
+
+    <p class="progress" id="progress-text">0 of 15 letters solved</p>
+
+    <p class="footnote">
+      Heads up: galleries here rotate in and out for restoration work. Every answer below comes from the building itself, its signage, or your own head — no off-limits gallery required. Stuck? Front-desk staff are weirdly good at this.
+    </p>
+  </section>
+
+  <section id="screen-challenge" class="screen" hidden>
+    <button class="back" id="btn-back" type="button">‹ Back to puzzle</button>
+
+    <div class="challenge-card">
+      <div class="challenge-letter" id="challenge-letter">?</div>
+      <p class="challenge-label" id="challenge-label">Math</p>
+      <p class="challenge-question" id="challenge-question"></p>
+
+      <div id="challenge-form">
+        <input type="text" id="challenge-input" placeholder="Type your answer" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <div class="challenge-actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btn-submit">Submit</button>
+        </div>
+      </div>
+
+      <p class="feedback-error" id="feedback-error" hidden>Not quite. Try again, or cancel back to the puzzle.</p>
+
+      <div class="success-panel" id="success-panel" hidden>
+        <p class="success-title">Correct!</p>
+        <p class="success-sub" id="success-sub"></p>
+        <button class="btn btn-primary" id="btn-ok" type="button">OK</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="win-overlay" class="overlay" hidden>
+  <div class="win-card">
+    <p class="eyebrow">Solved</p>
+    <h2 id="win-phrase"></h2>
+    <p>138 years old and still figuring itself out. Go find a staff member — they've got the next step for you.</p>
+    <button class="btn btn-primary" id="btn-win-close" type="button">Keep exploring</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  var PHRASE = "A MUSEUM HAVING AN IDENTITY CRISIS";
+  var WORDS = PHRASE.split(" ");
+  var LETTERS = ["A","C","D","E","G","H","I","M","N","R","S","T","U","V","Y"];
+
+  // Answers are base64-encoded so they aren't plainly readable via view-source.
+  // This is obfuscation, not real security — decoded client-side at check time.
+  var CHALLENGES = {
+  "A": {
+    "label": "Math",
+    "q": "Look up at the dome inside the museum's grand old entrance. It rises 27 metres into the air. Stack three of those domes on top of one another — how many metres tall is your tower?",
+    "a": [
+      "ODE="
+    ]
+  },
+  "C": {
+    "label": "History",
+    "q": "Fill in the blank: from 1819 to 1941, Singapore's story is told under the banner “Crown ____.”",
+    "a": [
+      "Y29sb255",
+      "Y3Jvd24gY29sb255"
+    ]
+  },
+  "D": {
+    "label": "History",
+    "q": "The old dome glows through panels of coloured glass — one for every year of a particular queen's reign. How many panels are there?",
+    "a": [
+      "NTA="
+    ]
+  },
+  "E": {
+    "label": "History",
+    "q": "In what year did this building first open its doors, back when it was simply the Raffles Library and Museum?",
+    "a": [
+      "MTg4Nw=="
+    ]
+  },
+  "G": {
+    "label": "Art Installation",
+    "q": "A digital art collective called teamLab turned old botanical drawings into a glowing jungle inside the Glass Rotunda. The piece is called “Story of the ____.” What's the missing word?",
+    "a": [
+      "Zm9yZXN0"
+    ]
+  },
+  "H": {
+    "label": "Legend",
+    "q": "Legend says a prince landed here in 1299, spotted a strange beast, and named the island “Singapura” — City of the ____. What animal gave Singapore its name?",
+    "a": [
+      "bGlvbg=="
+    ]
+  },
+  "I": {
+    "label": "Art Installation",
+    "q": "teamLab brought a set of old watercolour drawings to life as the animals and plants of Story of the Forest. How many original drawings did they animate?",
+    "a": [
+      "Njk="
+    ]
+  },
+  "M": {
+    "label": "Math",
+    "q": "The original building opened its doors in 1887. How many candles would go on its birthday cake this year, 2026?",
+    "a": [
+      "MTM5"
+    ]
+  },
+  "N": {
+    "label": "History",
+    "q": "For 13 years — 1993 to 2006 — this museum dropped “National” for a more on-the-nose name. What was it called?",
+    "a": [
+      "c2luZ2Fwb3JlIGhpc3RvcnkgbXVzZXVt"
+    ]
+  },
+  "R": {
+    "label": "Artefact",
+    "q": "Singapore's most famous unreadable inscription is a chunk of sandstone from the 10th–14th century, found at the mouth of the Singapore River — the British literally blew part of it up to widen the waterway. What's this fragment called?",
+    "a": [
+      "c2luZ2Fwb3JlIHN0b25l"
+    ]
+  },
+  "S": {
+    "label": "History",
+    "q": "In what year was this museum officially declared a National Monument of Singapore?",
+    "a": [
+      "MTk5Mg=="
+    ]
+  },
+  "T": {
+    "label": "Art Installation",
+    "q": "Among the animals roaming through Story of the Forest is a shy, long-snouted, black-and-white creature native to Southeast Asia's rainforests. Name it.",
+    "a": [
+      "dGFwaXI=",
+      "bWFsYXlhbiB0YXBpcg=="
+    ]
+  },
+  "U": {
+    "label": "Math",
+    "q": "The museum's address is 93 Stamford Road. Multiply the two digits of “93” together. What do you get?",
+    "a": [
+      "Mjc="
+    ]
+  },
+  "V": {
+    "label": "History",
+    "q": "Those 50 stained-glass panels in the old dome mark 50 years on the throne for which British queen?",
+    "a": [
+      "dmljdG9yaWE=",
+      "cXVlZW4gdmljdG9yaWE="
+    ]
+  },
+  "Y": {
+    "label": "History",
+    "q": "The museum's big glass-and-steel makeover finished in 2006, after three years of work. In what year did construction begin?",
+    "a": [
+      "MjAwMw=="
+    ]
+  }
+};
+
+  function decode(b64){
+    try { return decodeURIComponent(escape(atob(b64))); }
+    catch(e){ return ""; }
+  }
+
+  var solved = new Set();
+  var current = null;
+
+  function normalize(s){
+    return s.trim().toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+  }
+
+  function checkAnswer(letter, raw){
+    var norm = normalize(raw);
+    if (!norm) return false;
+    return CHALLENGES[letter].a.some(function(encoded){
+      return norm === normalize(decode(encoded));
+    });
+  }
+
+  function renderBoard(){
+    var board = document.getElementById("phrase-board");
+    board.innerHTML = "";
+    WORDS.forEach(function(word){
+      var wordEl = document.createElement("div");
+      wordEl.className = "word";
+      word.split("").forEach(function(ch){
+        var isRevealed = solved.has(ch);
+        if (isRevealed){
+          var span = document.createElement("span");
+          span.className = "box revealed";
+          span.textContent = ch;
+          wordEl.appendChild(span);
+        } else {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "box";
+          btn.setAttribute("aria-label", "Blank tile, tap to reveal a challenge");
+          // letter captured by closure only — not exposed as a DOM attribute
+          btn.addEventListener("click", function(){ openChallenge(ch); });
+          wordEl.appendChild(btn);
+        }
+      });
+      board.appendChild(wordEl);
+    });
+  }
+
+  function updateProgress(){
+    document.getElementById("progress-text").textContent =
+      solved.size + " of " + LETTERS.length + " letters solved";
+  }
+
+  function showScreen(name){
+    document.getElementById("screen-main").hidden = (name !== "main");
+    document.getElementById("screen-challenge").hidden = (name !== "challenge");
+    window.scrollTo(0, 0);
+  }
+
+  function openChallenge(letter){
+    current = letter;
+    var data = CHALLENGES[letter];
+    document.getElementById("challenge-letter").textContent = "?";
+    document.getElementById("challenge-label").textContent = data.label;
+    document.getElementById("challenge-question").textContent = data.q;
+    document.getElementById("challenge-input").value = "";
+    document.getElementById("feedback-error").hidden = true;
+    document.getElementById("success-panel").hidden = true;
+    document.getElementById("challenge-form").hidden = false;
+    showScreen("challenge");
+    setTimeout(function(){
+      document.getElementById("challenge-input").focus();
+    }, 60);
+  }
+
+  function backToMain(){
+    showScreen("main");
+  }
+
+  function submitAnswer(){
+    var raw = document.getElementById("challenge-input").value;
+    if (checkAnswer(current, raw)){
+      document.getElementById("challenge-letter").textContent = current;
+      document.getElementById("challenge-form").hidden = true;
+      document.getElementById("feedback-error").hidden = true;
+      document.getElementById("success-sub").textContent =
+        "It's " + current + " — lit wherever it appears.";
+      document.getElementById("success-panel").hidden = false;
+    } else {
+      document.getElementById("feedback-error").hidden = false;
+    }
+  }
+
+  function handleOk(){
+    solved.add(current);
+    renderBoard();
+    updateProgress();
+    showScreen("main");
+    if (solved.size === LETTERS.length){
+      setTimeout(showWin, 450);
+    }
+  }
+
+  function showWin(){
+    document.getElementById("win-phrase").textContent = PHRASE;
+    document.getElementById("win-overlay").hidden = false;
+  }
+
+  document.getElementById("btn-back").addEventListener("click", backToMain);
+  document.getElementById("btn-cancel").addEventListener("click", backToMain);
+  document.getElementById("btn-submit").addEventListener("click", submitAnswer);
+  document.getElementById("challenge-input").addEventListener("keydown", function(e){
+    if (e.key === "Enter"){
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+  document.getElementById("btn-ok").addEventListener("click", handleOk);
+  document.getElementById("btn-win-close").addEventListener("click", function(){
+    document.getElementById("win-overlay").hidden = true;
+  });
+
+  renderBoard();
+  updateProgress();
+
+})();
+</script>
+
+</body>
+</html>
