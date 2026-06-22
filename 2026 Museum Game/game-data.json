@@ -1,9 +1,7 @@
 {
-  "Note -Pos1x" : "0000000001111111111222222222244444444445555555555"
-  "Note -Posx1" : "1234567890123456789012345678901234567890123456789"
   "puzzlePhrase": "BE THE GREATEST TEAM THAT THE WORLD HAS EVER SEEN",
-  "winPhrase": "Let's make history!  Impossible?  FUN!",
-  "winMessage": "Extra Credit: The phrase is from song lyrics... name the song and artist!",
+  "winPhrase": "Impossible?  Done!",
+  "winMessage": "Extra Credit: Name the song and artist for this phrase!",
   "challenges": [
     {
       "label": "Big Spice",
