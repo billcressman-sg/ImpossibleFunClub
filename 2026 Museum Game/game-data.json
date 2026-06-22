@@ -1,0 +1,138 @@
+{
+  "Note -Pos1x" : "0000000001111111111222222222244444444445555555555"
+  "Note -Posx1" : "1234567890123456789012345678901234567890123456789"
+  "puzzlePhrase": "BE THE GREATEST TEAM THAT THE WORLD HAS EVER SEEN",
+  "winPhrase": "Let's make history!  Impossible?  FUN!",
+  "winMessage": "Extra Credit: The phrase is from song lyrics... name the song and artist!",
+  "challenges": [
+    {
+      "label": "Big Spice",
+      "q": "What is the longest dimension of this chili pepper (cm)?",
+      "a": ["380"],
+      "img": "chili.jpg"
+    },
+    {
+      "label": "Lego Mania",
+      "q": "In this lego exhibit, who is talking on a phone while riding a rickshaw?",
+      "a": ["bugs bunny", "bugsbunny"],
+      "img": "lego.jpg"
+    },
+    {
+      "label": "Shopping",
+      "q": "In 'Capsule 3' the plates are not hidden and one shows a fruit that is sometimes forbidden. What is it?",
+      "a": ["durian"]
+    },
+    {
+      "label": "Exhibit",
+      "q": "Outside on a sign in a fun place to play it says the museum had a ____ on display.",
+      "a": ["whale"]
+    },
+    {
+      "label": "Museum",
+      "q": "The 'donor wall' lists various levels of donors. Who is the very last Patron listed?",
+      "a": ["supercar ladies club"]
+    },
+    {
+      "label": "Exhibit",
+      "q": "Pose for a photo, show your face. Wear a brown hat for a ____ race!",
+      "a": ["rickshaw"],
+      "img": "coolies.jpg"
+    },
+    {
+      "label": "Art",
+      "q": "There is an outdoor sculpture of the bones of a ship, and the artist has an interesting first name. What is it?",
+      "a": ["napoleon"]
+    },
+    {
+      "label": "Art Installation",
+      "q": "A video shows an animated mural from the walls of Singapore. There is a guy cutting ice below a sign. What is the sign selling?",
+      "a": ["soy sauce"],
+      "img": "mural.jpg"
+    },
+    {
+      "label": "Exhibit",
+      "q": "At the 'Shores of Singapore', make your icon land on the three men. Whose name is given?",
+      "a": ["sang nila utama"]
+    },
+    {
+      "label": "Mini MBS",
+      "q": "There is a scale model of the MBS on display near other tiny buildings. What is the scale?",
+      "a": ["1:1250", "1250"]
+    },
+    {
+      "label": "Art Installation",
+      "q": "In a digital waterfall, what should you wear for protection?",
+      "a": ["wristband"]
+    },
+    {
+      "label": "Art",
+      "q": "Underneath a stairway, there's a painting of a tiger. Who painted it?",
+      "a": ["yip yew chong"]
+    },
+    {
+      "label": "Pretty In Pink",
+      "q": "In Once Upon a Tide, there are some pink sneakers. What is the exhibit number?",
+      "a": ["5514"]
+    },
+    {
+      "label": "Rooster",
+      "q": "The beloved wife of M. Hassan lies in an old graveyard. What was her name?",
+      "a": ["chik"],
+      "img": "rooster.jpg"
+    },
+    {
+      "label": "Exhibit",
+      "q": "There is a wall of wishes.  Summarize this guy's wish in two words.",
+      "a": ["pass exam", "pass exams", "pass my exams", "pass all my exams", "pass all exams"],
+      "img": "wishingwall.jpg"
+    },
+    {
+      "label": "Exhibit",
+      "q": "This image is from what era?  Hint ___ __ ____",
+      "a": ["age of exploration"],
+      "img": "boatquay.jpg"
+    },
+    {
+      "label": "Cafe",
+      "q": "They serve this in the cafe for $12... what is the dish called?",
+      "a": ["chili crab bao", "chili crab", "bao"],
+      "img": "food.jpg"
+    },
+    {
+      "label": "Exhibit",
+      "q": "Get Curious and look for a penpal.  One kid, age 6, asked where do you get water? What is his name?",
+      "a": ["benedict yan"]
+    },
+    {
+      "label": "Exhibit",
+      "q": "Find an icon on a big rock and hover over it.  What's it called?",
+      "a": ["singapore stone"],
+      "img": "rock.jpg"
+    },
+    {
+      "label": "Art Installation",
+      "q": "teamLab brought a set of old watercolour drawings to life as the animals and plants of Story of the Forest. How many original drawings did they animate?",
+      "a": ["69"]
+    },
+    {
+      "label": "Architecture",
+      "q": "Look up at the dome inside the museum's grand old entrance. It rises 27 metres into the air. Stack three of those domes on top of one another — how many metres tall is your tower?",
+      "a": ["81"]
+    },
+    {
+      "label": "Architecture",
+      "q": "The old dome glows through panels of coloured glass — one for every year of a particular queen's reign. How many panels are there?",
+      "a": ["50"]
+    },
+    {
+      "label": "History",
+      "q": "In what year did this building first open its doors, back when it was simply the Raffles Library and Museum?",
+      "a": ["1887"]
+    },
+    {
+      "label": "History",
+      "q": "For 13 years — 1993 to 2006 — this museum dropped 'National' for a more on-the-nose name. What was it called?",
+      "a": ["singapore history museum"]
+    }
+  ]
+}

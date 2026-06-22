@@ -1,0 +1,668 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070310">
+<title>NMS Letter Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple:        #5522DD;
+    --purple-light:  #7744ff;
+    --orange:        #DD7722;
+    --orange-light:  #f09060;
+    --bg:            #070310;
+    --bg-2:          #0e0620;
+    --bg-3:          #170c30;
+    --text:          #FFFFFF;
+    --text-dim:      #9090bb;
+    --error:         #e05568;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    margin:0;
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter Tight',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-weight:300;
+  }
+
+  body{
+    background:
+      radial-gradient(ellipse 600px 400px at 50% -40px, rgba(85,34,221,0.28), transparent 70%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 60%, var(--bg) 100%);
+    min-height:100vh;
+  }
+
+  .stage{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .screen{
+    padding:28px 20px 40px;
+    min-height:100vh;
+  }
+  .screen[hidden]{ display:none; }
+
+  .brand-logo{
+    height:26px;
+    display:block;
+    margin-bottom:16px;
+    filter:brightness(0) invert(1);
+    opacity:0.9;
+  }
+
+  .eyebrow{
+    margin:0;
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--orange);
+    font-weight:700;
+  }
+  h1{
+    font-family:'Inter Tight',sans-serif;
+    font-size:clamp(28px,8vw,38px);
+    font-weight:700;
+    line-height:1.05;
+    margin:6px 0 10px;
+    color:var(--text);
+  }
+  h2{
+    font-family:'Inter Tight',sans-serif;
+    font-weight:700;
+    margin:0 0 8px;
+  }
+  .category{
+    margin:0 0 18px;
+    font-size:14px;
+    font-style:italic;
+    font-weight:300;
+    color:var(--text-dim);
+  }
+  .category span{
+    color:var(--orange);
+    font-style:normal;
+    font-weight:700;
+  }
+  .rules{
+    margin:0 0 22px;
+    font-size:14.5px;
+    font-weight:300;
+    line-height:1.6;
+    color:rgba(255,255,255,0.70);
+  }
+  .footnote{
+    margin:26px 0 0;
+    font-size:12px;
+    font-weight:300;
+    line-height:1.6;
+    color:var(--text-dim);
+    border-top:1px solid rgba(85,34,221,0.30);
+    padding-top:14px;
+  }
+
+  .board{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:18px 14px;
+    margin:0 0 22px;
+    padding:20px 12px;
+    border-radius:14px;
+    background:rgba(85,34,221,0.07);
+    border:1px solid rgba(85,34,221,0.30);
+  }
+  .word{
+    display:flex;
+    gap:7px;
+  }
+  .box{
+    -webkit-appearance:none;
+    appearance:none;
+    width:clamp(27px,8.6vw,36px);
+    height:clamp(36px,11.4vw,46px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:6px;
+    font-weight:700;
+    font-size:clamp(15px,4.8vw,19px);
+    font-family:inherit;
+    margin:0;
+    padding:0;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 6px, transparent 6px 12px),
+      var(--bg-3);
+    border:1px solid rgba(255,255,255,0.07);
+    box-shadow:inset 0 2px 4px rgba(0,0,0,0.45);
+    color:transparent;
+  }
+  button.box{
+    cursor:pointer;
+    border:1px solid rgba(85,34,221,0.45);
+    transition:transform .08s ease, border-color .15s ease, background .15s ease;
+  }
+  button.box:active{
+    transform:translateY(1px) scale(0.96);
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.06) 0 6px, transparent 6px 12px),
+      var(--bg-2);
+  }
+  button.box:focus-visible{
+    outline:2px solid var(--purple-light);
+    outline-offset:2px;
+  }
+  @media (hover:hover){
+    button.box:hover{ border-color:rgba(119,68,255,0.80); }
+  }
+  .box.revealed{
+    color:var(--text);
+    background:linear-gradient(160deg, var(--purple-light), var(--purple));
+    border-color:var(--purple-light);
+    box-shadow:0 0 0 1px rgba(85,34,221,0.50), 0 2px 12px rgba(85,34,221,0.55);
+    animation:pop .35s ease-out;
+  }
+  @keyframes pop{
+    0%{ transform:scale(.75) rotateX(40deg); }
+    100%{ transform:scale(1) rotateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .box.revealed{ animation:none; }
+  }
+
+  .progress{
+    text-align:center;
+    font-size:12.5px;
+    font-weight:400;
+    letter-spacing:.04em;
+    color:var(--text-dim);
+    margin-bottom:6px;
+  }
+
+  .back{
+    background:none;
+    border:none;
+    color:var(--orange);
+    font-size:14px;
+    font-family:inherit;
+    font-weight:700;
+    padding:0;
+    margin-bottom:20px;
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .back:focus-visible{ outline:2px solid var(--purple-light); }
+
+  .challenge-card{
+    border:1px solid rgba(85,34,221,0.30);
+    border-radius:16px;
+    background:rgba(85,34,221,0.06);
+    padding:26px 20px;
+    text-align:center;
+  }
+  .challenge-letter{
+    width:56px;
+    height:56px;
+    margin:0 auto 18px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Inter Tight',sans-serif;
+    font-size:26px;
+    font-weight:700;
+    color:var(--text);
+    background:linear-gradient(160deg, var(--purple-light), var(--purple));
+  }
+  .challenge-label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--orange);
+    margin:0 0 10px;
+  }
+  .challenge-image{
+    width:100%;
+    border-radius:10px;
+    margin-bottom:16px;
+    display:block;
+    object-fit:cover;
+    max-height:220px;
+  }
+  .challenge-question{
+    font-size:16.5px;
+    font-weight:300;
+    line-height:1.6;
+    color:var(--text);
+    margin:0 0 22px;
+  }
+  #challenge-input{
+    width:100%;
+    padding:13px 14px;
+    font-size:16px;
+    font-family:inherit;
+    font-weight:400;
+    border-radius:10px;
+    border:1px solid rgba(85,34,221,0.45);
+    background:rgba(0,0,0,0.35);
+    color:var(--text);
+    margin-bottom:14px;
+  }
+  #challenge-input::placeholder{ color:var(--text-dim); }
+  #challenge-input:focus-visible{ outline:2px solid var(--purple-light); }
+  .challenge-actions{
+    display:flex;
+    gap:10px;
+  }
+  .btn{
+    flex:1;
+    padding:13px 14px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:700;
+    font-family:inherit;
+    border:1px solid transparent;
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .btn:focus-visible{ outline:2px solid var(--purple-light); outline-offset:2px; }
+  .btn-primary{
+    background:linear-gradient(160deg, var(--purple-light), var(--purple));
+    color:var(--text);
+  }
+  .btn-primary:active{ transform:translateY(1px); }
+  .btn-ghost{
+    background:transparent;
+    border-color:rgba(255,255,255,0.20);
+    color:var(--text);
+  }
+  .feedback-error{
+    margin-top:16px;
+    font-size:14px;
+    font-weight:400;
+    color:var(--error);
+  }
+  .success-panel{ text-align:center; }
+  .success-title{
+    font-family:'Inter Tight',sans-serif;
+    font-size:24px;
+    font-weight:700;
+    color:#b090ff;
+    margin:4px 0 6px;
+  }
+  .success-sub{
+    font-size:14px;
+    font-weight:300;
+    color:var(--text-dim);
+    margin:0 0 20px;
+  }
+
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(7,3,16,0.88);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:10;
+  }
+  .overlay[hidden]{ display:none; }
+  .win-card{
+    max-width:380px;
+    text-align:center;
+    border:1px solid var(--purple);
+    border-radius:18px;
+    background:var(--bg-2);
+    padding:32px 24px;
+    box-shadow:0 0 48px rgba(85,34,221,0.35);
+  }
+  .win-card h2{
+    color:var(--orange);
+    font-size:22px;
+    margin-top:8px;
+  }
+  .win-card p{
+    font-size:14.5px;
+    font-weight:300;
+    line-height:1.6;
+    color:rgba(255,255,255,0.75);
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <section id="screen-main" class="screen">
+    <img src="AscentialLogoSmall.webp" alt="Ascential Technologies" class="brand-logo">
+    <p class="eyebrow">National Museum of Singapore</p>
+    <h1>AMLS Letter Hunt #1</h1>
+    <p class="category">Impossible? <span>Done!</span></p>
+
+    <p class="rules">
+      Tap any blank box below to pull up a challenge. Solve it, and it will show that letter, and possibly some other boxes sharing that same letter (but maybe not all of them). Get it wrong, or cancel out, and the box stays blank, ready to try again. 
+    </p>
+
+    <div class="board" id="phrase-board" aria-live="polite"></div>
+
+    <p class="progress" id="progress-text"></p>
+
+    <p class="footnote">
+      As you finish a letter, take a selfie of your team celebrating, crying, debating or whatever
+      seems appropriate for the completion of the latest clue. For a perfect score, fill out
+      all the letters and submit an appropriate selfie with each completed clue.
+    </p>
+  </section>
+
+  <section id="screen-challenge" class="screen" hidden>
+    <button class="back" id="btn-back" type="button">â€¹ Back to puzzle</button>
+
+    <div class="challenge-card">
+      <div class="challenge-letter" id="challenge-letter">?</div>
+      <p class="challenge-label" id="challenge-label">Category</p>
+      <img id="challenge-image" class="challenge-image" src="" alt="Challenge hint image" style="display:none;">
+      <p class="challenge-question" id="challenge-question"></p>
+
+      <div id="challenge-form">
+        <input type="text" id="challenge-input" placeholder="Type your answer" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done">
+        <div class="challenge-actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel">Cancel</button>
+          <button type="button" class="btn btn-primary" id="btn-submit">Submit</button>
+        </div>
+      </div>
+
+      <p class="feedback-error" id="feedback-error" hidden>Not quite. Try again, or cancel back to the puzzle.</p>
+
+      <div class="success-panel" id="success-panel" hidden>
+        <p class="success-title">Correct!</p>
+        <p class="success-sub" id="success-sub"></p>
+        <button class="btn btn-primary" id="btn-ok" type="button">OK</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="win-overlay" class="overlay" hidden>
+  <div class="win-card">
+    <p class="eyebrow">Solved</p>
+    <h2 id="win-phrase"></h2>
+    <p id="win-message"></p>
+    <button class="btn btn-primary" id="btn-win-close" type="button">Keep exploring</button>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  // Game data encoded so answers aren't plainly readable in view-source.
+  var data = "eyAgInB1enpsZVBocmFzZSI6ICJCRSBUSEUgR1JFQVRFU1QgVEVBTSBUSEFUIFRIRSBXT1JMRCBIQVMgRVZFUiBTRUVOIiwKICAid2luUGhyYXNlIjogIkxldCdzIG1ha2UgaGlzdG9yeSEgIEltcG9zc2libGU/ICBGVU4hIiwKICAid2luTWVzc2FnZSI6ICJFeHRyYSBDcmVkaXQ6IFRoZSBwaHJhc2UgaXMgZnJvbSBzb25nIGx5cmljcy4uLiBuYW1lIHRoZSBzb25nIGFuZCBhcnRpc3QhIiwKICAiY2hhbGxlbmdlcyI6IFsKICAgIHsKICAgICAgImxhYmVsIjogIkJpZyBTcGljZSIsCiAgICAgICJxIjogIldoYXQgaXMgdGhlIGxvbmdlc3QgZGltZW5zaW9uIG9mIHRoaXMgY2hpbGkgcGVwcGVyIChjbSk/IiwKICAgICAgImEiOiBbIjM4MCJdLAogICAgICAiaW1nIjogImNoaWxpLmpwZyIKICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJMZWdvIE1hbmlhIiwKICAgICAgInEiOiAiSW4gdGhpcyBsZWdvIGV4aGliaXQsIHdobyBpcyB0YWxraW5nIG9uIGEgcGhvbmUgd2hpbGUgcmlkaW5nIGEgcmlja3NoYXc/IiwKICAgICAgImEiOiBbImJ1Z3MgYnVubnkiLCAiYnVnc2J1bm55Il0sCiAgICAgICJpbWciOiAibGVnby5qcGciCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiU2hvcHBpbmciLAogICAgICAicSI6ICJJbiAnQ2Fwc3VsZSAzJyB0aGUgcGxhdGVzIGFyZSBub3QgaGlkZGVuIGFuZCBvbmUgc2hvd3MgYSBmcnVpdCB0aGF0IGlzIHNvbWV0aW1lcyBmb3JiaWRkZW4uIFdoYXQgaXMgaXQ/IiwKICAgICAgImEiOiBbImR1cmlhbiJdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhoaWJpdCIsCiAgICAgICJxIjogIk91dHNpZGUgb24gYSBzaWduIGluIGEgZnVuIHBsYWNlIHRvIHBsYXkgaXQgc2F5cyB0aGUgbXVzZXVtIGhhZCBhIF9fX18gb24gZGlzcGxheS4iLAogICAgICAiYSI6IFsid2hhbGUiXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIk11c2V1bSIsCiAgICAgICJxIjogIlRoZSAnZG9ub3Igd2FsbCcgbGlzdHMgdmFyaW91cyBsZXZlbHMgb2YgZG9ub3JzLiBXaG8gaXMgdGhlIHZlcnkgbGFzdCBQYXRyb24gbGlzdGVkPyIsCiAgICAgICJhIjogWyJzdXBlcmNhciBsYWRpZXMgY2x1YiJdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhoaWJpdCIsCiAgICAgICJxIjogIlBvc2UgZm9yIGEgcGhvdG8sIHNob3cgeW91ciBmYWNlLiBXZWFyIGEgYnJvd24gaGF0IGZvciBhIF9fX18gcmFjZSEiLAogICAgICAiYSI6IFsicmlja3NoYXciXSwKICAgICAgImltZyI6ICJjb29saWVzLmpwZyIKICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJBcnQiLAogICAgICAicSI6ICJUaGVyZSBpcyBhbiBvdXRkb29yIHNjdWxwdHVyZSBvZiB0aGUgYm9uZXMgb2YgYSBzaGlwLCBhbmQgdGhlIGFydGlzdCBoYXMgYW4gaW50ZXJlc3RpbmcgZmlyc3QgbmFtZS4gV2hhdCBpcyBpdD8iLAogICAgICAiYSI6IFsibmFwb2xlb24iXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIkFydCBJbnN0YWxsYXRpb24iLAogICAgICAicSI6ICJBIHZpZGVvIHNob3dzIGFuIGFuaW1hdGVkIG11cmFsIGZyb20gdGhlIHdhbGxzIG9mIFNpbmdhcG9yZS4gVGhlcmUgaXMgYSBndXkgY3V0dGluZyBpY2UgYmVsb3cgYSBzaWduLiBXaGF0IGlzIHRoZSBzaWduIHNlbGxpbmc/IiwKICAgICAgImEiOiBbInNveSBzYXVjZSJdLAogICAgICAiaW1nIjogIm11cmFsLmpwZyIKICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJFeGhpYml0IiwKICAgICAgInEiOiAiQXQgdGhlICdTaG9yZXMgb2YgU2luZ2Fwb3JlJywgbWFrZSB5b3VyIGljb24gbGFuZCBvbiB0aGUgdGhyZWUgbWVuLiBXaG9zZSBuYW1lIGlzIGdpdmVuPyIsCiAgICAgICJhIjogWyJzYW5nIG5pbGEgdXRhbWEiXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIk1pbmkgTUJTIiwKICAgICAgInEiOiAiVGhlcmUgaXMgYSBzY2FsZSBtb2RlbCBvZiB0aGUgTUJTIG9uIGRpc3BsYXkgbmVhciBvdGhlciB0aW55IGJ1aWxkaW5ncy4gV2hhdCBpcyB0aGUgc2NhbGU/IiwKICAgICAgImEiOiBbIjE6MTI1MCIsICIxMjUwIl0KICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJBcnQgSW5zdGFsbGF0aW9uIiwKICAgICAgInEiOiAiSW4gYSBkaWdpdGFsIHdhdGVyZmFsbCwgd2hhdCBzaG91bGQgeW91IHdlYXIgZm9yIHByb3RlY3Rpb24/IiwKICAgICAgImEiOiBbIndyaXN0YmFuZCJdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiQXJ0IiwKICAgICAgInEiOiAiVW5kZXJuZWF0aCBhIHN0YWlyd2F5LCB0aGVyZSdzIGEgcGFpbnRpbmcgb2YgYSB0aWdlci4gV2hvIHBhaW50ZWQgaXQ/IiwKICAgICAgImEiOiBbInlpcCB5ZXcgY2hvbmciXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIlByZXR0eSBJbiBQaW5rIiwKICAgICAgInEiOiAiSW4gT25jZSBVcG9uIGEgVGlkZSwgdGhlcmUgYXJlIHNvbWUgcGluayBzbmVha2Vycy4gV2hhdCBpcyB0aGUgZXhoaWJpdCBudW1iZXI/IiwKICAgICAgImEiOiBbIjU1MTQiXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIlJvb3N0ZXIiLAogICAgICAicSI6ICJUaGUgYmVsb3ZlZCB3aWZlIG9mIE0uIEhhc3NhbiBsaWVzIGluIGFuIG9sZCBncmF2ZXlhcmQuIFdoYXQgd2FzIGhlciBuYW1lPyIsCiAgICAgICJhIjogWyJjaGlrIl0sCiAgICAgICJpbWciOiAicm9vc3Rlci5qcGciCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiRXhoaWJpdCIsCiAgICAgICJxIjogIlRoZXJlIGlzIGEgd2FsbCBvZiB3aXNoZXMuICBTdW1tYXJpemUgdGhpcyBndXkncyB3aXNoIGluIHR3byB3b3Jkcy4iLAogICAgICAiYSI6IFsicGFzcyBleGFtIiwgInBhc3MgZXhhbXMiLCAicGFzcyBteSBleGFtcyIsICJwYXNzIGFsbCBteSBleGFtcyIsICJwYXNzIGFsbCBleGFtcyJdLAogICAgICAiaW1nIjogIndpc2hpbmd3YWxsLmpwZyIKICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJFeGhpYml0IiwKICAgICAgInEiOiAiVGhpcyBpbWFnZSBpcyBmcm9tIHdoYXQgZXJhPyAgSGludCBfX18gX18gX19fXyIsCiAgICAgICJhIjogWyJhZ2Ugb2YgZXhwbG9yYXRpb24iXSwKICAgICAgImltZyI6ICJib2F0cXVheS5qcGciCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiQ2FmZSIsCiAgICAgICJxIjogIlRoZXkgc2VydmUgdGhpcyBpbiB0aGUgY2FmZSBmb3IgJDEyLi4uIHdoYXQgaXMgdGhlIGRpc2ggY2FsbGVkPyIsCiAgICAgICJhIjogWyJjaGlsaSBjcmFiIGJhbyIsICJjaGlsaSBjcmFiIiwgImJhbyJdLAogICAgICAiaW1nIjogImZvb2QuanBnIgogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIkV4aGliaXQiLAogICAgICAicSI6ICJHZXQgQ3VyaW91cyBhbmQgbG9vayBmb3IgYSBwZW5wYWwuICBPbmUga2lkLCBhZ2UgNiwgYXNrZWQgd2hlcmUgZG8geW91IGdldCB3YXRlcj8gV2hhdCBpcyBoaXMgbmFtZT8iLAogICAgICAiYSI6IFsiYmVuZWRpY3QgeWFuIl0KICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJFeGhpYml0IiwKICAgICAgInEiOiAiRmluZCBhbiBpY29uIG9uIGEgYmlnIHJvY2sgYW5kIGhvdmVyIG92ZXIgaXQuICBXaGF0J3MgaXQgY2FsbGVkPyIsCiAgICAgICJhIjogWyJzaW5nYXBvcmUgc3RvbmUiXSwKICAgICAgImltZyI6ICJyb2NrLmpwZyIKICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJBcnQgSW5zdGFsbGF0aW9uIiwKICAgICAgInEiOiAidGVhbUxhYiBicm91Z2h0IGEgc2V0IG9mIG9sZCB3YXRlcmNvbG91ciBkcmF3aW5ncyB0byBsaWZlIGFzIHRoZSBhbmltYWxzIGFuZCBwbGFudHMgb2YgU3Rvcnkgb2YgdGhlIEZvcmVzdC4gSG93IG1hbnkgb3JpZ2luYWwgZHJhd2luZ3MgZGlkIHRoZXkgYW5pbWF0ZT8iLAogICAgICAiYSI6IFsiNjkiXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIkFyY2hpdGVjdHVyZSIsCiAgICAgICJxIjogIkxvb2sgdXAgYXQgdGhlIGRvbWUgaW5zaWRlIHRoZSBtdXNldW0ncyBncmFuZCBvbGQgZW50cmFuY2UuIEl0IHJpc2VzIDI3IG1ldHJlcyBpbnRvIHRoZSBhaXIuIFN0YWNrIHRocmVlIG9mIHRob3NlIGRvbWVzIG9uIHRvcCBvZiBvbmUgYW5vdGhlciDigJQgaG93IG1hbnkgbWV0cmVzIHRhbGwgaXMgeW91ciB0b3dlcj8iLAogICAgICAiYSI6IFsiODEiXQogICAgfSwKICAgIHsKICAgICAgImxhYmVsIjogIkFyY2hpdGVjdHVyZSIsCiAgICAgICJxIjogIlRoZSBvbGQgZG9tZSBnbG93cyB0aHJvdWdoIHBhbmVscyBvZiBjb2xvdXJlZCBnbGFzcyDigJQgb25lIGZvciBldmVyeSB5ZWFyIG9mIGEgcGFydGljdWxhciBxdWVlbidzIHJlaWduLiBIb3cgbWFueSBwYW5lbHMgYXJlIHRoZXJlPyIsCiAgICAgICJhIjogWyI1MCJdCiAgICB9LAogICAgewogICAgICAibGFiZWwiOiAiSGlzdG9yeSIsCiAgICAgICJxIjogIkluIHdoYXQgeWVhciBkaWQgdGhpcyBidWlsZGluZyBmaXJzdCBvcGVuIGl0cyBkb29ycywgYmFjayB3aGVuIGl0IHdhcyBzaW1wbHkgdGhlIFJhZmZsZXMgTGlicmFyeSBhbmQgTXVzZXVtPyIsCiAgICAgICJhIjogWyIxODg3Il0KICAgIH0sCiAgICB7CiAgICAgICJsYWJlbCI6ICJIaXN0b3J5IiwKICAgICAgInEiOiAiRm9yIDEzIHllYXJzIOKAlCAxOTkzIHRvIDIwMDYg4oCUIHRoaXMgbXVzZXVtIGRyb3BwZWQgJ05hdGlvbmFsJyBmb3IgYSBtb3JlIG9uLXRoZS1ub3NlIG5hbWUuIFdoYXQgd2FzIGl0IGNhbGxlZD8iLAogICAgICAiYSI6IFsic2luZ2Fwb3JlIGhpc3RvcnkgbXVzZXVtIl0KICAgIH0KICBdCn0KDQo=";
+
+  var gameData = (function(){
+    var binary = atob(data);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  })();
+
+  function mapBoxIDsToChallengeIDs(gameData) {
+    const phrase = gameData.puzzlePhrase.toUpperCase();
+    const uniqueLetters = [];
+    const seen = new Set();
+
+    for (const ch of phrase) {
+      if (/[A-Z]/.test(ch) && !seen.has(ch)) {
+        seen.add(ch);
+        uniqueLetters.push(ch);
+      }
+    }
+
+    let challengeIds = Object.keys(gameData.challenges);
+    while (challengeIds.length < uniqueLetters.length) {
+      challengeIds = challengeIds.concat(Object.keys(gameData.challenges));
+    }
+
+    const letterPositions = {};
+    [...phrase].forEach((ch, pos) => {
+      if (!/[A-Z]/.test(ch)) return;
+      (letterPositions[ch] ||= []).push(pos);
+    });
+
+    const boxToChallenge = Array(phrase.length).fill(null);
+    const letterChallenges = {};
+    uniqueLetters.forEach(l => letterChallenges[l] = []);
+
+    let challengeIndex = 0;
+    let occurrenceIndex = 0;
+
+    while (challengeIndex < challengeIds.length) {
+      let assignedThisRound = false;
+
+      for (const letter of uniqueLetters) {
+        const positions = letterPositions[letter];
+
+        if (occurrenceIndex < positions.length &&
+            challengeIndex < challengeIds.length) {
+
+          const challengeId = challengeIds[challengeIndex++];
+          const position = positions[occurrenceIndex];
+
+          boxToChallenge[position] = challengeId;
+          letterChallenges[letter].push(challengeId);
+          assignedThisRound = true;
+        }
+      }
+
+      if (!assignedThisRound) break;
+      occurrenceIndex++;
+    }
+
+    for (const letter of uniqueLetters) {
+      const positions = letterPositions[letter];
+      const assigned = letterChallenges[letter];
+
+      for (let i = 0; i < positions.length; i++) {
+        const pos = positions[i];
+        if (boxToChallenge[pos] !== null) continue;
+        boxToChallenge[pos] = assigned[i % assigned.length];
+      }
+    }
+
+    return boxToChallenge;
+  }
+
+
+  var puzzlePhrase = gameData.puzzlePhrase;
+  var WORDS = puzzlePhrase.split(" ");
+  var BOX_TO_CHALLENGE = mapBoxIDsToChallengeIDs(gameData);
+  var TOTAL_CHALLENGES = Object.keys(gameData.challenges).length;
+
+  var solvedChallenges = new Set();
+  var current = null;
+
+  var COOKIE_NAME = 'nmslh1';
+
+  function fnv1a(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+    return h.toString(16);
+  }
+
+  function saveSolved() {
+    var val = fnv1a(data) + '|' + Array.from(solvedChallenges).join(',');
+    document.cookie = COOKIE_NAME + '=' + encodeURIComponent(val) +
+      '; max-age=2592000; path=/; SameSite=Lax';
+  }
+
+  function loadSolved() {
+    var match = document.cookie.match(/(?:^|;\s*)nmslh1=([^;]*)/);
+    if (!match) return;
+    var val = decodeURIComponent(match[1]);
+    var sep = val.indexOf('|');
+    if (sep === -1 || val.substring(0, sep) !== fnv1a(data)) return;
+    var ids = val.substring(sep + 1);
+    if (ids) ids.split(',').forEach(function(id) { solvedChallenges.add(id); });
+  }
+
+  function normalize(s){
+    return s.trim().toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ");
+  }
+
+  function checkAnswer(challengeId, raw){
+    var norm = normalize(raw);
+    if (!norm) return false;
+    return gameData.challenges[challengeId].a.some(function(ans){
+      return norm === normalize(ans);
+    });
+  }
+
+  function renderBoard(){
+    var board = document.getElementById("phrase-board");
+    board.innerHTML = "";
+    var phraseIndex = 0;
+
+    WORDS.forEach(function(word){
+      var wordEl = document.createElement("div");
+      wordEl.className = "word";
+
+      word.split("").forEach(function(ch){
+        var challengeId = BOX_TO_CHALLENGE[phraseIndex];
+        var isSolved = challengeId !== null && solvedChallenges.has(String(challengeId));
+
+        if (isSolved){
+          var span = document.createElement("span");
+          span.className = "box revealed";
+          span.textContent = ch;
+          wordEl.appendChild(span);
+        } else {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "box";
+          (function(idx){ btn.addEventListener("click", function(){ openChallenge(idx); }); })(phraseIndex);
+          wordEl.appendChild(btn);
+        }
+        phraseIndex++;
+      });
+
+      board.appendChild(wordEl);
+      phraseIndex++;
+    });
+  }
+
+  function updateProgress(){
+    document.getElementById("progress-text").textContent =
+      solvedChallenges.size + " of " + TOTAL_CHALLENGES + " challenges solved";
+  }
+
+  function showScreen(name){
+    document.getElementById("screen-main").hidden = (name !== "main");
+    document.getElementById("screen-challenge").hidden = (name !== "challenge");
+    window.scrollTo(0, 0);
+  }
+
+  function openChallenge(boxId){
+    current = boxId;
+    var challengeId = String(BOX_TO_CHALLENGE[boxId]);
+    var data = gameData.challenges[challengeId];
+    document.getElementById("challenge-letter").textContent = puzzlePhrase[boxId];
+    document.getElementById("challenge-label").textContent = data.label;
+    document.getElementById("challenge-question").textContent = data.q;
+    document.getElementById("challenge-input").value = "";
+    document.getElementById("feedback-error").hidden = true;
+    document.getElementById("success-panel").hidden = true;
+    document.getElementById("challenge-form").hidden = false;
+
+    var imgEl = document.getElementById("challenge-image");
+    if (data.img){
+      imgEl.src = data.img;
+      imgEl.alt = "Challenge hint image";
+      imgEl.style.display = "block";
+    } else {
+      imgEl.src = "";
+      imgEl.style.display = "none";
+    }
+
+    showScreen("challenge");
+    setTimeout(function(){
+      document.getElementById("challenge-input").focus();
+    }, 60);
+  }
+
+  function backToMain(){
+    showScreen("main");
+  }
+
+  function submitAnswer(){
+    var raw = document.getElementById("challenge-input").value;
+    var challengeId = String(BOX_TO_CHALLENGE[current]);
+    if (checkAnswer(challengeId, raw)){
+      document.getElementById("challenge-letter").textContent = puzzlePhrase[current];
+      document.getElementById("challenge-form").hidden = true;
+      document.getElementById("feedback-error").hidden = true;
+      document.getElementById("success-sub").textContent =
+        "Don't forget to take a selfie!";
+      document.getElementById("success-panel").hidden = false;
+    } else {
+      document.getElementById("feedback-error").hidden = false;
+    }
+  }
+
+  function handleOk(){
+    var challengeId = String(BOX_TO_CHALLENGE[current]);
+    solvedChallenges.add(challengeId);
+    saveSolved();
+    renderBoard();
+    updateProgress();
+    showScreen("main");
+
+    if (solvedChallenges.size === TOTAL_CHALLENGES){
+      setTimeout(showWin, 450);
+    }
+  }
+
+  function showWin(){
+    document.getElementById("win-phrase").textContent = gameData.winPhrase;
+    document.getElementById("win-message").textContent = gameData.winMessage;
+    document.getElementById("win-overlay").hidden = false;
+  }
+
+  document.getElementById("btn-back").addEventListener("click", backToMain);
+  document.getElementById("btn-cancel").addEventListener("click", backToMain);
+  document.getElementById("btn-submit").addEventListener("click", submitAnswer);
+  document.getElementById("challenge-input").addEventListener("keydown", function(e){
+    if (e.key === "Enter"){
+      e.preventDefault();
+      submitAnswer();
+    }
+  });
+  document.getElementById("btn-ok").addEventListener("click", handleOk);
+  document.getElementById("btn-win-close").addEventListener("click", function(){
+    document.getElementById("win-overlay").hidden = true;
+  });
+
+  loadSolved();
+  renderBoard();
+  updateProgress();
+
+})();
+</script>
+
+</body>
+</html>
+
