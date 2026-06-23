@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -356,6 +356,76 @@
     line-height:1.6;
     color:rgba(255,255,255,0.75);
   }
+
+  /* --- Answer key / question list section --- */
+  .answer-key-separator{
+    margin:34px 0 24px;
+    border:none;
+    border-top:1px dashed rgba(85,34,221,0.45);
+  }
+  .answer-key{
+    margin-bottom:10px;
+  }
+  .answer-key-title{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--orange);
+    margin:0 0 14px;
+  }
+  .answer-key-item{
+    border:1px solid rgba(85,34,221,0.25);
+    border-radius:10px;
+    background:rgba(85,34,221,0.05);
+    padding:12px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .answer-key-item:active{ transform:translateY(1px); }
+  .answer-key-item:focus-visible{ outline:2px solid var(--purple-light); outline-offset:2px; }
+  @media (hover:hover){
+    .answer-key-item:hover{ border-color:rgba(119,68,255,0.70); }
+  }
+  .answer-key-item.is-solved{
+    border-color:rgba(85,34,221,0.55);
+    background:rgba(85,34,221,0.10);
+  }
+  .answer-key-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .answer-key-label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .answer-key-status{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.04em;
+  }
+  .answer-key-status.solved{ color:var(--purple-light); }
+  .answer-key-status.unsolved{ color:var(--text-dim); }
+  .answer-key-question{
+    font-size:13.5px;
+    font-weight:300;
+    line-height:1.5;
+    color:rgba(255,255,255,0.80);
+    margin:0;
+  }
+  .answer-key-answer{
+    margin:8px 0 0;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--orange-light);
+  }
 </style>
 </head>
 <body>
@@ -382,6 +452,13 @@
       seems appropriate for the completion of the latest clue. For a perfect score, fill out
       all the letters and submit an appropriate selfie with each completed clue.
     </p>
+
+    <hr class="answer-key-separator">
+
+    <div class="answer-key">
+      <p class="answer-key-title">All Questions</p>
+      <div id="answer-key-list"></div>
+    </div>
   </section>
 
   <section id="screen-challenge" class="screen" hidden>
@@ -507,6 +584,15 @@
   var BOX_TO_CHALLENGE = mapBoxIDsToChallengeIDs(gameData);
   var TOTAL_CHALLENGES = Object.keys(gameData.challenges).length;
 
+  // Reverse lookup: challengeId -> first boxId that uses it, so the
+  // answer-key list can open a challenge without a real board click.
+  var CHALLENGE_TO_BOX = {};
+  BOX_TO_CHALLENGE.forEach(function(challengeId, boxId){
+    if (challengeId === null) return;
+    var key = String(challengeId);
+    if (!(key in CHALLENGE_TO_BOX)) CHALLENGE_TO_BOX[key] = boxId;
+  });
+
   var solvedChallenges = new Set();
   var current = null;
 
@@ -582,6 +668,65 @@
     });
   }
 
+  function renderAnswerKey(){
+    var list = document.getElementById("answer-key-list");
+    list.innerHTML = "";
+
+    gameData.challenges.forEach(function(challenge, idx){
+      var challengeId = String(idx);
+      var isSolved = solvedChallenges.has(challengeId);
+
+      var item = document.createElement("div");
+      item.className = "answer-key-item" + (isSolved ? " is-solved" : "");
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+
+      var openThis = (function(cid){
+        return function(){
+          var boxId = CHALLENGE_TO_BOX[cid];
+          if (boxId !== undefined) openChallenge(boxId);
+        };
+      })(challengeId);
+
+      item.addEventListener("click", openThis);
+      item.addEventListener("keydown", function(e){
+        if (e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          openThis();
+        }
+      });
+
+      var row = document.createElement("div");
+      row.className = "answer-key-row";
+
+      var label = document.createElement("span");
+      label.className = "answer-key-label";
+      label.textContent = (idx + 1) + ". " + challenge.label;
+      row.appendChild(label);
+
+      var status = document.createElement("span");
+      status.className = "answer-key-status " + (isSolved ? "solved" : "unsolved");
+      status.textContent = isSolved ? "Solved" : "Unsolved";
+      row.appendChild(status);
+
+      item.appendChild(row);
+
+      var q = document.createElement("p");
+      q.className = "answer-key-question";
+      q.textContent = challenge.q;
+      item.appendChild(q);
+
+      if (isSolved){
+        var ans = document.createElement("p");
+        ans.className = "answer-key-answer";
+        ans.textContent = "Answer: " + challenge.a[0];
+        item.appendChild(ans);
+      }
+
+      list.appendChild(item);
+    });
+  }
+
   function updateProgress(){
     document.getElementById("progress-text").textContent =
       solvedChallenges.size + " of " + TOTAL_CHALLENGES + " challenges solved";
@@ -645,6 +790,7 @@
     solvedChallenges.add(challengeId);
     saveSolved();
     renderBoard();
+    renderAnswerKey();
     updateProgress();
     showScreen("main");
 
@@ -658,6 +804,7 @@
     solvedChallenges.clear();
     document.cookie = COOKIE_NAME + '=; max-age=0; path=/; SameSite=Lax';
     renderBoard();
+    renderAnswerKey();
     updateProgress();
   }
 
@@ -684,6 +831,7 @@
 
   loadSolved();
   renderBoard();
+  renderAnswerKey();
   updateProgress();
   if (solvedChallenges.size === TOTAL_CHALLENGES){ showWin(); }
 
@@ -692,4 +840,3 @@
 
 </body>
 </html>
-
